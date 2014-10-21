@@ -2096,6 +2096,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
 
           return function link ( scope, element, attrs ) {
             var tooltip;
+            var isHovered = false;
             var transitionTimeout;
             var popupTimeout;
             var appendToBody = angular.isDefined( options.appendToBody ) ? options.appendToBody : false;
@@ -2177,10 +2178,18 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
               }
             }
 
-            function hideTooltipBind () {
-              scope.$apply(function () {
-                hide();
-              });
+            function hideTooltipBind() {
+                if (triggers.show == "mouseenter" && scope.tt_popupStay) {
+                    $timeout(function () {  // some timeout in case users are not directly hovered to popup
+                        var isHoveredNow = false;
+                        if (tooltip)
+                            isHoveredNow = tooltip.is(":hover"); // returns true or falsec
+                        if (!isHovered && !isHoveredNow)
+                            hide();
+                    }, 200, false);
+                } else {
+                    hide();
+                }
             }
 
             // Show the tooltip popup element.
@@ -2245,7 +2254,18 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
               if (tooltip) {
                 removeTooltip();
               }
-              tooltip = tooltipLinker(scope, function () {});
+              tooltip = tooltipLinker(scope, function () { });
+
+                if (scope.tt_popupStay) {
+                    tooltip.mouseenter(function() {
+                        isHovered = true;
+                    }).mouseleave(function() {
+                        isHovered = false;
+                        if (triggers.show == "mouseenter") {
+                            hideTooltipBind();
+                        }
+                    });
+                }
 
               // Get contents rendered into the tooltip
               scope.$digest();
@@ -2280,6 +2300,10 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             attrs.$observe( prefix+'PopupDelay', function ( val ) {
               var delay = parseInt( val, 10 );
               scope.tt_popupDelay = ! isNaN(delay) ? delay : options.popupDelay;
+            });
+
+            attrs.$observe(prefix + 'PopupStay', function (val) {
+                scope.tt_popupStay = (val=='true');
             });
 
             var unregisterTriggers = function() {
