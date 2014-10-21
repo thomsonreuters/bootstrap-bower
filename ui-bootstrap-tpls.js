@@ -2536,6 +2536,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
           return function link ( scope, element, attrs ) {
             var tooltip;
             var tooltipLinkedScope;
+            var isHovered = false;
             var transitionTimeout;
             var popupTimeout;
             var appendToBody = angular.isDefined( options.appendToBody ) ? options.appendToBody : false;
@@ -2585,10 +2586,18 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
               }
             }
 
-            function hideTooltipBind () {
-              scope.$apply(function () {
+            function hideTooltipBind() {
+              if (triggers.show == "mouseenter" && ttScope.popupStay) {
+                $timeout(function () { // Some timeout in case users are not directly hovered to popup
+                  var isHoveredNow = false;
+                  if (tooltip)
+                    isHoveredNow = tooltip.is(":hover"); // Returns true or falsec
+                  if (!isHovered && !isHoveredNow)
+                    hide();
+                }, 200, false);
+              } else {
                 hide();
-              });
+              }
             }
 
             // Show the tooltip popup element.
@@ -2660,6 +2669,17 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
               }
               tooltipLinkedScope = ttScope.$new();
               tooltip = tooltipLinker(tooltipLinkedScope, angular.noop);
+
+              if (ttScope.popupStay) {
+                tooltip.mouseenter(function () {
+                  isHovered = true;
+                }).mouseleave(function () {
+                  isHovered = false;
+                  if (triggers.show == "mouseenter") {
+                    hideTooltipBind();
+                  }
+                });
+              }
             }
 
             function removeTooltip() {
@@ -2704,6 +2724,10 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
               var delay = parseInt( val, 10 );
               ttScope.popupDelay = ! isNaN(delay) ? delay : options.popupDelay;
             }
+
+            attrs.$observe(prefix + 'PopupStay', function (val) {
+              ttScope.popupStay = (val == 'true');
+            });
 
             var unregisterTriggers = function () {
               element.unbind(triggers.show, showTooltipBind);
