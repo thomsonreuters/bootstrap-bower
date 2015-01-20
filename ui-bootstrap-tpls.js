@@ -1538,7 +1538,7 @@ function ($compile, $parse, $document, $position, dateFilter, dateParser, datepi
       ngModel.$render = function() {
         var date = ngModel.$viewValue ? dateFilter(ngModel.$viewValue, dateFormat) : '';
         element.val(date);
-        scope.date = parseDate( ngModel.$modelValue );
+        scope.date = parseDate( ngModel.$viewValue );
       };
 
       var documentClickBind = function(event) {
