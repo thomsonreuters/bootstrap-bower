@@ -937,7 +937,7 @@ angular.module('ui.bootstrap.position', [])
             return hostElPos.left + hostElPos.width / 2 - targetElWidth / 2;
           },
           left: function () {
-            return hostElPos.left;
+            return hostElPos.left - targetElWidth;
           },
           right: function () {
             return hostElPos.left + hostElPos.width;
