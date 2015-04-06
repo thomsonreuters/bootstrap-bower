@@ -2630,11 +2630,11 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
                 element.after( tooltip );
               }
 
-              positionTooltip();
-
               // And show the tooltip.
               ttScope.isOpen = true;
-              ttScope.$digest(); // digest required as $apply is not called
+              ttScope.$parent.$digest(); // digest required as $apply is not called
+
+              positionTooltip();
 
               // Return positioning function as promise callback for correct
               // positioning after draw.

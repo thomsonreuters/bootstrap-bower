@@ -16,7 +16,6 @@ angular.module("ui.bootstrap.ext.popover", ["ui.bootstrap.popover"])
                   var contentEl = angular.element( iElement[0].querySelector( '.popover-content' ) );
                   contentEl.children().remove();
                   contentEl.append( $compile( response.data.trim() )( scope.$parent.$parent.$parent ) );
-                  $timeout(function(){ scope.$parent.$parent.$parent.$digest(); });
                 });
           });
         }
